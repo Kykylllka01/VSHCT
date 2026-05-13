@@ -100,9 +100,11 @@
                                     <a href="{{ route('projects.show', $notification->data['project_id'] ?? 0) }}"
                                         class="block px-4 py-3 hover:bg-gray-50 transition">
                                         <p class="text-sm font-medium text-deep-blue">
-                                            {{ $notification->data['message'] ?? 'Уведомление' }}</p>
+                                            {{ $notification->data['message'] ?? 'Уведомление' }}
+                                        </p>
                                         <p class="text-xs text-slate-light mt-1">
-                                            {{ $notification->created_at->diffForHumans() }}</p>
+                                            {{ $notification->created_at->diffForHumans() }}
+                                        </p>
                                     </a>
                                 @endforeach
                             @else
@@ -159,6 +161,10 @@
                 <a href="{{ route('admin.projects.index') }}"
                     class="block px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('admin.projects.*') ? 'bg-mint/10 text-mint' : 'text-slate-text hover:bg-gray-100' }}">
                     Проекты
+                </a>
+                <a href="{{ route('admin.ideas.index') }}"
+                    class="block px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('admin.ideas.*') ? 'bg-mint/10 text-mint' : 'text-slate-text hover:bg-gray-100' }}">
+                    Идеи
                 </a>
             </nav>
         </aside>

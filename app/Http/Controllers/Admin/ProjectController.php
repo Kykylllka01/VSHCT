@@ -8,9 +8,6 @@ use Illuminate\Http\Request;
 
 class ProjectController extends Controller
 {
-    /**
-     * Список проектов с возможностью закрыть/активировать
-     */
     public function index(Request $request)
     {
         $projects = Project::with('teacher', 'idea')
@@ -24,13 +21,16 @@ class ProjectController extends Controller
         return view('admin.projects.index', compact('projects'));
     }
 
-    /**
-     * Закрытие / активация проекта
-     */
     public function close(Project $project)
     {
         $project->update(['status' => $project->status === 'active' ? 'completed' : 'active']);
         $message = $project->status === 'completed' ? 'Проект закрыт.' : 'Проект снова активен.';
         return back()->with('status', $message);
+    }
+
+    public function destroy(Project $project)
+    {
+        $project->delete();
+        return back()->with('status', 'Проект удалён.');
     }
 }

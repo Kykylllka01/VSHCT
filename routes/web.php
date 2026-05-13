@@ -78,9 +78,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'can:admin'])->group
     // Проекты
     Route::get('projects', [\App\Http\Controllers\Admin\ProjectController::class, 'index'])->name('projects.index');
     Route::patch('projects/{project}/close', [\App\Http\Controllers\Admin\ProjectController::class, 'close'])->name('projects.close');
+    Route::delete('projects/{project}', [\App\Http\Controllers\Admin\ProjectController::class, 'destroy'])->name('projects.destroy');
 
     // Статистика
     Route::get('statistics', [\App\Http\Controllers\Admin\DashboardController::class, 'statistics'])->name('statistics');
+
+    // Идеи
+    Route::resource('ideas', \App\Http\Controllers\Admin\IdeaController::class)->only(['index', 'destroy']);
+    Route::delete('ideas/{idea}', [\App\Http\Controllers\Admin\IdeaController::class, 'destroy'])->name('ideas.destroy');
 });
 
 require __DIR__ . '/auth.php';
