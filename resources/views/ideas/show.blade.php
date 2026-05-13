@@ -126,26 +126,62 @@
         </div>
     </div>
 
-    <!-- Комментарии -->
+        <!-- Комментарии -->
     <div class="glass-card rounded-2xl p-6">
-        <h2 class="text-xl font-semibold text-deep-blue mb-4">Комментарии</h2>
+        <h2 class="text-xl font-semibold text-deep-blue mb-4">
+            Комментарии ({{ $idea->comments->count() }})
+        </h2>
+
+        <!-- Форма добавления -->
+        @auth
+            <form method="POST" action="{{ route('comments.store', $idea) }}" class="mb-6">
+                @csrf
+                <textarea name="body" rows="2" 
+                    placeholder="Напишите ваш комментарий..." 
+                    class="w-full px-4 py-2.5 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-mint/30 focus:border-mint transition duration-200"
+                    required></textarea>
+                <button type="submit" class="mt-3 px-4 py-2 bg-mint text-white font-medium rounded-xl hover:bg-mint/90 transition shadow-sm text-sm">
+                    Отправить
+                </button>
+            </form>
+        @endauth
+
+        <!-- Список комментариев -->
         @if($idea->comments->count())
             <div class="space-y-4">
                 @foreach($idea->comments as $comment)
                     <div class="flex items-start space-x-3 p-3 bg-white/50 rounded-xl">
                         @if($comment->user->avatar)
                             <a href="{{ route('profile.show', $comment->user) }}">
-                                <img src="{{ Storage::url($comment->user->avatar) }}" class="w-8 h-8 rounded-full object-cover">
+                                <img src="{{ Storage::url($comment->user->avatar) }}" 
+                                     class="w-8 h-8 rounded-full object-cover">
                             </a>
                         @else
-                            <a href="{{ route('profile.show', $comment->user) }}" class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-slate-text">
+                            <a href="{{ route('profile.show', $comment->user) }}" 
+                               class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-slate-text">
                                 {{ Str::substr($comment->user->name, 0, 1) }}
                             </a>
                         @endif
-                        <div>
-                            <a href="{{ route('profile.show', $comment->user) }}" class="text-sm font-medium text-deep-blue hover:text-mint">{{ $comment->user->name }}</a>
-                            <p class="text-sm text-slate-text">{{ $comment->body }}</p>
-                            <p class="text-xs text-slate-light mt-1">{{ $comment->created_at->diffForHumans() }}</p>
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2">
+                                <a href="{{ route('profile.show', $comment->user) }}" 
+                                   class="text-sm font-medium text-deep-blue hover:text-mint">
+                                    {{ $comment->user->name }}
+                                </a>
+                                <span class="text-xs text-slate-light">
+                                    {{ $comment->created_at->diffForHumans() }}
+                                </span>
+                                @can('delete', $comment)
+                                    <form method="POST" action="{{ route('comments.destroy', $comment) }}" class="inline ml-auto">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-xs text-red-400 hover:text-red-600 transition">
+                                            Удалить
+                                        </button>
+                                    </form>
+                                @endcan
+                            </div>
+                            <p class="text-sm text-slate-text mt-1">{{ $comment->body }}</p>
                         </div>
                     </div>
                 @endforeach
