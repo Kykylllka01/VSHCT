@@ -42,4 +42,6 @@ class ProjectPolicy
     {
         return $user->id === $project->teacher_id || $user->isAdmin();
     }
+
+    
 }

@@ -9,70 +9,46 @@ use Illuminate\Http\Request;
 class UserController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Список всех пользователей
      */
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::with('role')->paginate(20);
+        $users = User::query()
+            ->when($request->role, function ($q, $role) {
+                $q->where('role', $role);
+            })
+            ->when($request->search, function ($q, $search) {
+                $q->where(function ($sub) use ($search) {
+                    $sub->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
         return view('admin.users.index', compact('users'));
     }
 
     /**
-     * Update the user's role.
+     * Форма редактирования роли
      */
-    public function changeRole(Request $request, User $user)
+    public function edit(User $user)
     {
-        $request->validate(['role' => 'required|in:student,teacher,admin']);
-        $user->role = $request->role;
-        $user->save();
-        return back()->with('success', 'Роль обновлена.');
+        return view('admin.users.edit', compact('user'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Обновление роли пользователя
      */
-    public function create()
+    public function updateRole(Request $request, User $user)
     {
-        //
-    }
+        $request->validate([
+            'role' => 'required|in:student,teacher,admin',
+        ]);
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+        $user->update(['role' => $request->role]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return redirect()->route('admin.users.index')->with('status', 'Роль пользователя обновлена.');
     }
 }

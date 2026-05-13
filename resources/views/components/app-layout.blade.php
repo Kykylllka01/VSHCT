@@ -48,16 +48,62 @@
 
           @auth
             @if(Auth::user()->isAdmin())
-              <a href="{{ route('dashboard') }}"
+              <a href="{{ route('admin.statistics') }}"
                 class="px-3 py-2 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition">
-                Панель
+                Панель управления
               </a>
             @endif
           @endauth
         </div>
 
         <!-- Профиль и меню пользователя -->
-        <div class="relative" x-data="{ open: false }">
+        <div class="relative flex" x-data="{ open: false }">
+
+          <!-- Колокольчик уведомлений -->
+          <div class="relative mr-4"
+            x-data="{ openNotif: false, unread: {{ Auth::user()->unreadNotifications->count() }} }">
+            <button @click="openNotif = !openNotif"
+              class="relative px-2 py-2 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              <span x-show="unread > 0"
+                class="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-alert-coral rounded-full"
+                x-text="unread"></span>
+            </button>
+
+            <!-- Выпадающий список -->
+            <div x-show="openNotif" @click.away="openNotif = false"
+              x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95"
+              x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75"
+              x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+              class="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg py-2 z-50 max-h-80 overflow-y-auto"
+              style="display: none;">
+              @if(Auth::user()->unreadNotifications->count())
+                <div class="px-4 py-2 border-b border-gray-100 flex justify-between items-center">
+                  <span class="text-xs font-semibold text-slate-light">Новые уведомления</span>
+                  <form method="POST" action="{{ route('notifications.markAllRead') }}" class="inline">
+                    @csrf
+                    <button type="submit"
+                      class="text-xs text-mint hover:underline bg-transparent border-none p-0 cursor-pointer">
+                      Прочитать все
+                    </button>
+                  </form>
+                </div>
+                @foreach(Auth::user()->unreadNotifications->take(5) as $notification)
+                  <a href="{{ route('projects.show', $notification->data['project_id'] ?? 0) }}"
+                    class="block px-4 py-3 hover:bg-gray-50 transition">
+                    <p class="text-sm font-medium text-deep-blue">{{ $notification->data['message'] ?? 'Уведомление' }}</p>
+                    <p class="text-xs text-slate-light mt-1">{{ $notification->created_at->diffForHumans() }}</p>
+                  </a>
+                @endforeach
+              @else
+                <div class="px-4 py-6 text-center text-sm text-slate-light">Нет новых уведомлений</div>
+              @endif
+            </div>
+          </div>
+
           <button @click="open = !open"
             class="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition">
             <span>{{ Auth::user()->name }}</span>
@@ -65,12 +111,13 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
             </svg>
           </button>
+
           <!-- Выпадающее меню -->
           <div x-show="open" @click.away="open = false" x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
             x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100"
             x-transition:leave-end="opacity-0 scale-95"
-            class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-1 z-50" style="display: none;">
+            class="absolute  top-10 right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-1 z-50" style="display: none;">
             <a href="{{ route('profile.show', Auth::user()) }}"
               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Мой профиль</a>
             <form method="POST" action="{{ route('logout') }}">

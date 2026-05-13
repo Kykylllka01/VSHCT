@@ -7,12 +7,26 @@ use App\Models\Idea;
 use App\Models\User;
 use App\Models\Task;
 use Illuminate\Http\Request;
+use App\Notifications\TaskAssigned;
 
 class ProjectController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $projects = Project::with('teacher', 'idea')->latest()->paginate(9);
+        $query = Project::with('teacher', 'idea');
+
+        // Поиск по названию
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where('title', 'like', "%{$search}%");
+        }
+
+        // Фильтр по статусу
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
+        }
+
+        $projects = $query->latest()->paginate(9)->withQueryString();
         return view('projects.index', compact('projects'));
     }
 
@@ -123,13 +137,18 @@ class ProjectController extends Controller
             'deadline' => 'nullable|date',
         ]);
 
-        $project->tasks()->create([
+        $task = $project->tasks()->create([
             'title' => $request->title,
             'description' => $request->description,
             'assigned_to' => $request->assigned_to,
             'deadline' => $request->deadline,
             'status' => 'todo',
         ]);
+
+        // Отправляем уведомление назначенному пользователю, если он указан
+        if ($task->assigned_to) {
+            $task->assignee->notify(new TaskAssigned($task));
+        }
 
         return back()->with('status', 'Задача добавлена.');
     }

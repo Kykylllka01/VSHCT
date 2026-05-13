@@ -5,8 +5,7 @@ use App\Http\Controllers\IdeaController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\ChatController;
-use App\Http\Controllers\Admin\UserController as AdminUserController;
-use App\Http\Controllers\Admin\ProjectController as AdminProjectController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\DashboardController;
 use Illuminate\Support\Facades\Route;
 
@@ -50,11 +49,25 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('projects/{project}/tasks', [ProjectController::class, 'storeTask'])->name('projects.tasks.store');
     Route::patch('projects/{project}/tasks/{task}/status', [ProjectController::class, 'updateTaskStatus'])->name('projects.tasks.status');
     Route::patch('projects/{project}/close', [ProjectController::class, 'close'])->name('projects.close');
+    // Пометить все уведомления прочитанными
+    Route::post('/notifications/mark-all-read', function () {
+        Auth::user()->unreadNotifications->markAsRead();
+        return back();
+    })->name('notifications.markAllRead');
 });
 
-Route::get('/dashboard', function () {
-    // Здесь можно передать данные для админ-панели
-    return view('dashboard');
-})->middleware(['auth', 'verified', 'can:admin'])->name('dashboard');
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'can:admin'])->group(function () {
+    // Пользователи
+    Route::get('users', [\App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
+    Route::get('users/{user}/edit', [\App\Http\Controllers\Admin\UserController::class, 'edit'])->name('users.edit');
+    Route::patch('users/{user}/role', [\App\Http\Controllers\Admin\UserController::class, 'updateRole'])->name('users.updateRole');
+
+    // Проекты
+    Route::get('projects', [\App\Http\Controllers\Admin\ProjectController::class, 'index'])->name('projects.index');
+    Route::patch('projects/{project}/close', [\App\Http\Controllers\Admin\ProjectController::class, 'close'])->name('projects.close');
+
+    // Статистика
+    Route::get('statistics', [\App\Http\Controllers\Admin\DashboardController::class, 'statistics'])->name('statistics');
+});
 
 require __DIR__ . '/auth.php';

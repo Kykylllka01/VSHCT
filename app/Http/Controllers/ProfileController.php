@@ -14,17 +14,22 @@ class ProfileController extends Controller
      * Просмотр профиля любого пользователя
      */
     public function show(User $user)
-    {
-        $user->load([
-            'skills',
-            'portfolioItems',
-            'ideas' => function ($q) {
-                $q->latest()->take(10);
-            }
-        ]);
+{
+    $user->load([
+        'skills',
+        'portfolioItems',
+        'ideas' => fn($q) => $q->latest()->take(10),
+        'projects',          // проекты, где пользователь участник
+        'ledProjects',       // проекты, где пользователь руководитель
+    ]);
 
-        return view('profile.show', compact('user'));
-    }
+    // Количество проектов
+    $projectCount = $user->projects->count();
+    $ledProjectCount = $user->ledProjects->count();
+    $totalProjects = $projectCount + $ledProjectCount;
+
+    return view('profile.show', compact('user', 'projectCount', 'ledProjectCount', 'totalProjects'));
+}
 
     /**
      * Форма редактирования собственного профиля

@@ -3,30 +3,39 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Idea;
 use App\Models\Project;
 use App\Models\User;
+use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
-    /**
-     * Главная страница админ-панели (заглушка)
-     */
     public function index()
     {
-        return view('admin.dashboard');
+        // заглушка, если нужна главная админ-панели
+        return redirect()->route('admin.statistics');
     }
 
-    /**
-     * Статистика по проектам и участникам
-     */
     public function statistics()
     {
         $totalUsers = User::count();
-        $totalIdeas = Idea::count();
-        $totalProjects = Project::count();
+        $students = User::where('role', 'student')->count();
+        $teachers = User::where('role', 'teacher')->count();
+        $admins = User::where('role', 'admin')->count();
 
-        return view('admin.statistics', compact('totalUsers', 'totalIdeas', 'totalProjects'));
+        $totalIdeas = Idea::count();
+        $publishedIdeas = Idea::where('status', 'published')->count();
+        $approvedIdeas = Idea::where('status', 'approved')->count();
+        $rejectedIdeas = Idea::where('status', 'rejected')->count();
+
+        $totalProjects = Project::count();
+        $activeProjects = Project::where('status', 'active')->count();
+        $completedProjects = Project::where('status', 'completed')->count();
+
+        return view('admin.statistics', compact(
+            'totalUsers', 'students', 'teachers', 'admins',
+            'totalIdeas', 'publishedIdeas', 'approvedIdeas', 'rejectedIdeas',
+            'totalProjects', 'activeProjects', 'completedProjects'
+        ));
     }
 }
