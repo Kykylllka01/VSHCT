@@ -57,6 +57,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Auth::user()->unreadNotifications->markAsRead();
         return back();
     })->name('notifications.markAllRead');
+
+    // Список чатов пользователя
+    Route::get('chats', [ChatController::class, 'index'])->name('chat.index');
+    // Чат конкретного проекта
+    Route::get('chats/{project}', [ChatController::class, 'show'])->name('chat.show');
+    // Отправка сообщения и получение новых (остались привязаны к проекту)
+    Route::post('projects/{project}/chat', [ChatController::class, 'store'])->name('chat.store');
+    Route::get('projects/{project}/chat/fetch', [ChatController::class, 'fetch'])->name('chat.fetch');
+
+    Route::get('projects/{project}/chat/older', [ChatController::class, 'fetchOlder'])->name('chat.older');
 });
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'can:admin'])->group(function () {
