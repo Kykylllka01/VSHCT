@@ -1,0 +1,104 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Анимация появления */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp 0.7s ease-out both;
+}
+
+/* Стеклянная карточка (glassmorphism) */
+.glass-card {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+/* Декоративные круги */
+.bg-blur-circle {
+    filter: blur(80px);
+    opacity: 0.3;
+    mix-blend-mode: multiply;
+    animation: pulse 8s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* Поля ввода с иконкой */
+.input-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #A0AEC0;
+    width: 20px;
+    height: 20px;
+}
+
+input.with-icon {
+    padding-left: 2.75rem;
+}
+
+/* Радио-карточки ролей – используем современный CSS :has() */
+.role-radio:checked + .role-label {
+    border-color: #00BFA6;
+    background-color: #E6F7F4;
+}
+
+/* Для навигации (на будущее) */
+.nav-link-active {
+    @apply text-mint border-b-2 border-mint;
+}
+
+.auth-card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* Стильный фоновый градиент для гостевых страниц */
+.guest-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Улучшенный input focus */
+.form-input:focus {
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+}
+
+/* Кастомный radio для ролей */
+.role-radio:checked + label {
+    border-color: #4f46e5;
+    background-color: #eef2ff;
+    color: #4f46e5;
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.3);
+}
+
+/* Кнопка */
+.btn-primary {
+    @apply inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-500 active:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150;
+}
+
+/* Сообщение об успехе */
+.alert-success {
+    @apply bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative;
+}
+
+/* Дополнительно: плавный переход для радио-карточек */
+input[type="radio"]:checked + label {
+    border-color: #6366f1;
+    background-color: #eef2ff;
+}
