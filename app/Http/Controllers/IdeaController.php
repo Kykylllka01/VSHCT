@@ -23,7 +23,7 @@ class IdeaController extends Controller
             $query->where('status', $request->status);
         }
 
-        $ideas = $query->latest()->paginate(10);
+        $ideas = $query->latest()->paginate(8)->withQueryString();
 
         return view('ideas.index', compact('ideas'));
     }
@@ -96,7 +96,7 @@ class IdeaController extends Controller
         $idea->delete();
         return redirect()->route('ideas.index')->with('success', 'Удалено.');
     }
-    
+
     public function updateStatus(Request $request, Idea $idea)
     {
         $this->authorize('update', $idea); // преподаватель или админ

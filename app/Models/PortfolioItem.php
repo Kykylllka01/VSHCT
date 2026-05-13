@@ -9,10 +9,11 @@ class PortfolioItem extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'title', 'description', 'url'];
+    protected $fillable = ['user_id', 'title', 'description', 'url', 'image'];
 
     public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class);
     }
+    
 }

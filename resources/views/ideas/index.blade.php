@@ -44,7 +44,7 @@
 
     <!-- Сетка идей -->
     @if($ideas->count())
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             @foreach($ideas as $idea)
                 <div
                     class="glass-card rounded-2xl p-6 flex flex-col hover:shadow-xl transition duration-200 hover:-translate-y-1">
@@ -89,7 +89,7 @@
 
         <!-- Пагинация -->
         <div class="mt-8">
-            {{ $ideas->links() }}
+            {{ $ideas->links('pagination.custom') }}
         </div>
     @else
         <div class="glass-card rounded-2xl p-12 text-center text-slate-light">

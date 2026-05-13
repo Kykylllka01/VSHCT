@@ -3,26 +3,45 @@
 namespace App\Http\Controllers;
 
 use App\Models\Skill;
+use App\Models\PortfolioItem;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ProfileController extends Controller
 {
-    public function show($id)
+    /**
+     * Просмотр профиля любого пользователя
+     */
+    public function show(User $user)
     {
-        $user = \App\Models\User::with('skills', 'portfolioItems', 'ideas')->findOrFail($id);
+        $user->load([
+            'skills',
+            'portfolioItems',
+            'ideas' => function ($q) {
+                $q->latest()->take(10);
+            }
+        ]);
+
         return view('profile.show', compact('user'));
     }
 
+    /**
+     * Форма редактирования собственного профиля
+     */
     public function edit()
     {
         $user = Auth::user();
         return view('profile.edit', compact('user'));
     }
 
+    /**
+     * Обновление профиля
+     */
     public function update(Request $request)
     {
         $user = Auth::user();
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
@@ -30,19 +49,57 @@ class ProfileController extends Controller
             'group' => 'nullable|string|max:50',
         ]);
 
-        $user->update($request->only('name', 'email', 'phone', 'group'));
+        // Обновляем основные поля
+        $user->update($request->only(['name', 'email', 'phone', 'group']));
+
+        // Загрузка аватара
+        if ($request->hasFile('avatar')) {
+            $path = $request->file('avatar')->store('avatars', 'public');
+            $user->update(['avatar' => $path]);
+        }
 
         // Синхронизация навыков
         if ($request->has('skills')) {
-            $skillIds = Skill::whereIn('name', $request->skills)->pluck('id')->toArray();
+            $skillNames = array_map('trim', explode(',', $request->skills));
+            $skillIds = [];
+            foreach ($skillNames as $name) {
+                if (!empty($name)) {
+                    $skill = Skill::firstOrCreate(['name' => $name]);
+                    $skillIds[] = $skill->id;
+                }
+            }
             $user->skills()->sync($skillIds);
         }
 
-        return back()->with('success', 'Профиль обновлён.');
+        // Добавление элемента портфолио (с изображением)
+        if ($request->filled('portfolio_title')) {
+            $imagePath = null;
+            if ($request->hasFile('portfolio_image')) {
+                $imagePath = $request->file('portfolio_image')->store('portfolio', 'public');
+            }
+
+            PortfolioItem::create([
+                'user_id' => $user->id,
+                'title' => $request->portfolio_title,
+                'description' => $request->portfolio_description,
+                'url' => $request->portfolio_url,
+                'image' => $imagePath,
+            ]);
+        }
+
+        return back()->with('status', 'Профиль обновлён.');
     }
 
-    public function destroy(Request $request)
+    /**
+     * Удаление элемента портфолио
+     */
+    public function destroyPortfolioItem(PortfolioItem $item)
     {
-        // Standard delete from breeze
+        if ($item->user_id !== Auth::id()) {
+            abort(403);
+        }
+        $item->delete();
+        return back()->with('status', 'Элемент удалён.');
     }
+
 }

@@ -30,7 +30,7 @@
                 </div>
             @endforeach
         </div>
-        {{ $projects->links() }}
+        {{ $projects->links('pagination.custom') }}
     @else
         <div class="glass-card rounded-2xl p-12 text-center text-slate-light">Нет проектов</div>
     @endif

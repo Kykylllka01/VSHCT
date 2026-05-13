@@ -13,7 +13,7 @@
   @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="font-sans antialiased bg-gray-50 min-h-screen">
+<body class="font-sans antialiased bg-gray-50 min-h-screen flex flex-col">
   <!-- Навигационная панель -->
   <nav class="bg-deep-blue border-b border-white/10 shadow-lg">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -86,11 +86,46 @@
   </nav>
 
   <!-- Основной контент -->
-  <main class="py-12">
+  <main class="flex-1 py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
       {{ $slot }}
     </div>
   </main>
+
+  <!-- Футер -->
+  <footer class="bg-deep-blue text-white/80 mt-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- О платформе -->
+        <div>
+          <h3 class="text-lg font-semibold text-white mb-3">ВШЦТ</h3>
+          <p class="text-sm text-white/60">Высшая школа цифровых технологий – платформа для управления проектами и
+            идеями студентов.</p>
+        </div>
+        <!-- Навигация -->
+        <div>
+          <h3 class="text-lg font-semibold text-white mb-3">Разделы</h3>
+          <ul class="space-y-2 text-sm">
+            <li><a href="{{ route('ideas.index') }}" class="hover:text-white transition">Реестр идей</a></li>
+            <li><a href="{{ route('projects.index') }}" class="hover:text-white transition">Проекты</a></li>
+            @auth
+              <li><a href="{{ route('profile.show', Auth::user()) }}" class="hover:text-white transition">Мой профиль</a>
+              </li>
+            @endauth
+          </ul>
+        </div>
+        <!-- Контакты -->
+        <div>
+          <h3 class="text-lg font-semibold text-white mb-3">Контакты</h3>
+          <p class="text-sm text-white/60">Email: support@vshct.ru</p>
+          <p class="text-sm text-white/60">Телефон: +7 (999) 123-45-67</p>
+        </div>
+      </div>
+      <div class="mt-8 pt-6 border-t border-white/10 text-center text-sm text-white/40">
+        &copy; {{ date('Y') }} ВШЦТ. Все права защищены.
+      </div>
+    </div>
+  </footer>
 </body>
 
 </html>
